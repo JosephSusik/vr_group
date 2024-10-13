@@ -1,0 +1,11 @@
+.App {
+    width: 100vw;
+    height: 100vh;
+}
+
+.content {
+    display: flex;
+    justify-content: space-around;
+    width: 100%;
+    height: calc(100% - 32px);
+}

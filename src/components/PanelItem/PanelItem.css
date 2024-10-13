@@ -1,0 +1,31 @@
+.panelItem {
+    width: 99%;
+    border-radius: 3px;
+    border: 1px solid black;
+    box-sizing: border-box;
+    flex-grow: 1;
+    flex-basis: 33%;
+    position: relative;
+    user-select: none;
+    padding-top: 8px;
+
+    max-height: calc(100% / 3);
+}
+
+
+.panelItem:nth-child(2) {
+    margin-top: 8px;
+    margin-bottom: 8px;
+}
+
+.panelItemHandle {
+    position: absolute;
+    top: 0px;
+    right: 0px;
+    scale: .5;
+    z-index: 1000;
+}
+
+.panelItemHandle:hover {
+    cursor: grab;
+}

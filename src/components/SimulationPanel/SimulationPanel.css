@@ -1,0 +1,41 @@
+.simulationPanel {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 100%;
+}
+
+.simulationBtns {
+    display: flex;
+    gap: 20px;
+    padding: 4px 8px;
+    border: 1px solid black;
+    border-radius: 2px;
+    align-items: center;
+    width: min-content;
+}
+
+.clickableBtns {
+    display: flex;
+    align-items: center;
+}
+
+.clickableBtns:hover {
+    cursor: pointer;
+}
+
+.simulationInfo {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+}
+
+.simulationControls {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 24px;
+    height: 100%;
+    justify-content: center;
+}

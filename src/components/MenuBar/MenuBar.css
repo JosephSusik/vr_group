@@ -1,0 +1,22 @@
+nav {
+    height: 32px;
+    width: 100vw;
+    border-bottom: 1px solid black;
+    box-sizing: border-box;
+}
+
+.menuBar {
+    margin-left: 40px;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.menuBar li {
+    list-style-type: none;
+}
+
+.menuBar li:hover {
+    cursor: pointer;
+}

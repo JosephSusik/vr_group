@@ -1,0 +1,48 @@
+.dataLogPanel {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 100%;
+    gap: 8px;
+}
+
+.dataLogOutput {
+    width: 90%;
+    height: 90%;
+
+    overflow-y: scroll;
+    
+    border: 1px solid lightgray;
+    box-sizing: border-box;
+    border-radius: 2px;
+    padding-left: 8px;
+
+    display: flex;
+    flex-direction: column;    
+}
+
+.dataLogOutput p {
+    width: 100%; /* Set the width to 100% of the container */
+    word-wrap: break-word; /* Ensure long words or text wrap within the width */
+}
+
+/* width */
+.dataLogOutput::-webkit-scrollbar {
+    width: 4px;
+    border-radius: 2px;
+}
+  
+  /* Track */
+.dataLogOutput::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+  
+  /* Handle */
+.dataLogOutput::-webkit-scrollbar-thumb {
+    background: #888;
+}
+
+  /* Handle on hover */
+.dataLogOutput::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}

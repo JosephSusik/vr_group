@@ -1,8 +1,14 @@
+import "./App.css"
+import MenuBar from "./components/MenuBar/MenuBar";
+import Simulation from "./components/Simulation/Simulation";
 
 function App() {
   return (
-    <div>
-      Hello world!
+    <div className="App">
+      <MenuBar />
+      <section className="content">
+        <Simulation />
+      </section>
     </div>
   );
 }

@@ -1,0 +1,13 @@
+.mapView {
+    flex-basis: 69%;
+    align-self: center;
+    height: 98%;
+    border: 1px solid black;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.map {
+    width: 100%;
+    height: 100%;
+}
