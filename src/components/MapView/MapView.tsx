@@ -7,33 +7,14 @@ import "./MapView.css"
 import { fromLonLat } from 'ol/proj';
 import { LineString, Point } from 'ol/geom';
 import VectorSource from 'ol/source/Vector';
-import { Style, Fill, Stroke, RegularShape } from 'ol/style';
+import { Style } from 'ol/style';
 import VectorLayer from 'ol/layer/Vector';
-
+import { createInfantry, generatePath, isPointFeature, lineStyle } from './MapHelpers';
 interface MapViewProps {
   log: (message: string) => void,
   setInfo: (info: any) => void
 }
 
-// Function to generate a path: 0.5 km north then 200 m southeast
-function generatePath(start: [number, number], northDistanceKm: number, eastDistanceM: number, angleDeg: number): [number, number][] {
-  const distanceDegreesNorth = northDistanceKm / 111.32; // Convert kilometers to degrees for north movement
-
-  // Calculate new north coordinate
-  const northCoordinate: [number, number] = [start[0], start[1] + distanceDegreesNorth];
-
-  // Calculate the new coordinates after moving 200 m at a 45-degree angle
-  const distanceDegreesEast = (eastDistanceM / 1000) / 111.32; // Convert meters to kilometers then to degrees
-  const angleRad = (angleDeg * Math.PI) / 180; // Convert angle to radians
-
-  // Calculate the new coordinates moving at a 45-degree angle
-  const eastCoordinate: [number, number] = [
-    northCoordinate[0] + (distanceDegreesEast * Math.cos(angleRad)),
-    northCoordinate[1] + (distanceDegreesEast * Math.sin(angleRad))
-  ];
-
-  return [start, northCoordinate, eastCoordinate]; // Return the path from start to north to southeast
-}
 
 function MapView({log, setInfo}: MapViewProps) {
   const mapRef = useRef<HTMLDivElement | null>(null);
@@ -54,92 +35,61 @@ function MapView({log, setInfo}: MapViewProps) {
 
     const vectorSource = new VectorSource();
 
-    // Create the marker as a feature
-    const marker = new Feature({
-      geometry: new Point(fromLonLat(coordinates)),
-      callsign: 'A1 Inf',
-      type: 'Light infantry',
-      position: coordinates,
-      curr_task: 'Move',
-      amount_ammo: 'None'
-    });
+    const infantry1 = createInfantry('A1 Inf', 'Light infantry', 'Move', 'None', [13.71, 48.905], true);
+    const infantry2 = createInfantry('A2 Inf', 'Medium infantry', 'Fight', '1000', [13.712, 48.905], true);
+    const infantry3 = createInfantry('A3 Inf', 'Heavy infantry', 'Stay', 'Infinite', [13.7105, 48.904], true);
 
-    // Create a style for the marker (red circle)
-    marker.setStyle(
-      new Style({
-        // Rectangle fill
-        fill: new Fill({
-          color: 'rgba(255, 0, 0, 0.5)', // Semi-transparent red
-        }),
-        // Rectangle outline
-        stroke: new Stroke({
-          color: 'black',
-          width: 1,
-        }),
-        // RegularShape to create the rectangle
-        // Using RegularShape to create diagonals as lines
-        image: new RegularShape({
-          fill: new Fill({ color: 'rgba(255, 0, 0, 0.5)' }),
-          stroke: new Stroke({
-            color: 'black',
-            width: 2,
-          }),
-          points: 4, // Number of points for the rectangle (4)
-          radius: 10, // Half the width/height of the rectangle
-          angle: Math.PI / 4, // Rotate the rectangle to create diagonals
-        }),
-      })
-    );
+    const enemyInfantry1 = createInfantry('B1 Inf', 'Very heavy infantry', 'Move', '42', [13.708, 48.9117], false);
+    const enemyInfantry2 = createInfantry('B2 Inf', 'Light infantry', 'Move', '100', [13.709, 48.911], false);
 
-    // Add the marker to the vector source
-    vectorSource.addFeature(marker);
-
-    // Create a vector layer with the vector source
+    vectorSource.addFeature(infantry1);
+    vectorSource.addFeature(infantry2);
+    vectorSource.addFeature(infantry3);
+    vectorSource.addFeature(enemyInfantry1);
+    vectorSource.addFeature(enemyInfantry2);
+    // Generate a straight line north from the infantry1
+    const lineCoordinates = generatePath(infantry1, 0.5, 200, 135); // 0.5 km north, 200 m at 135 degrees
+    const newLineString = new LineString(lineCoordinates.map(coord => fromLonLat(coord)));
+ 
+  // Create a new line feature
+    const newLineFeature = new Feature(newLineString);
+ 
+    // Add the line feature to the vector source
+    vectorSource.addFeature(newLineFeature);
+    newLineFeature.setStyle(new Style({}));
+    
     const vectorLayer = new VectorLayer({
       source: vectorSource,
     });
 
-    // Add the vector layer to the map
-    mapObj.addLayer(vectorLayer);
-
     // Variable to track the last selected marker
     let lastSelectedMarker: Feature<Point>|null = null;
-
-    // Generate a straight line north from the marker
-    const lineCoordinates = generatePath(coordinates, 0.5, 200, 45); // 0.5 km north, 200 m at 45 degrees
-    const newLineString = new LineString(lineCoordinates.map(coord => fromLonLat(coord)));
-
-    // Create a new line feature
-    const newLineFeature = new Feature(newLineString);
-
-    // Add the line feature to the vector source
-    vectorSource.addFeature(newLineFeature);
-    newLineFeature.setStyle(new Style({}));
+    
+    mapObj.addLayer(vectorLayer);
 
     // Add click event listener to the marker
     mapObj.on('singleclick', (event) => {
       mapObj.forEachFeatureAtPixel(event.pixel, (feature) => {
-        if (feature === marker) {
+        //Check if point is a marker
+        if (isPointFeature(feature)) {
           // Check if the same marker is clicked again
-          if (lastSelectedMarker === marker) {
+          if (lastSelectedMarker === feature) {
             log(`Entity ${feature.get('callsign')} deselected`);
             setInfo(null); // Reset the info when the same marker is clicked again
-            newLineFeature.setStyle(new Style({}));
             lastSelectedMarker = null; // Reset the last selected marker
+            newLineFeature.setStyle(new Style({}));
           } else {
             log(`Entity ${feature.get('callsign')} selected`);
             setInfo(feature.getProperties()); // Set the info for the selected marker
-            lastSelectedMarker = marker; // Update last selected marker
-           
-            // Style the line feature
-            newLineFeature.setStyle(
-              new Style({
-                stroke: new Stroke({
-                  color: 'red', // Red color for the line
-                  width: 2, // Line width
-                }),
-              })
-            );
+            lastSelectedMarker = feature; // Update last selected marker
+            
+            //Show line from Infantry1
+            if(feature === infantry1) {
+              newLineFeature.setStyle(lineStyle);
+            } else {
+              newLineFeature.setStyle(new Style({}));
+            }
+            
           }
         }
       });
